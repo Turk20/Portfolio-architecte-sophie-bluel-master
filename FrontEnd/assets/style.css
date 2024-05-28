@@ -90,7 +90,7 @@ nav ul {
 	list-style-type: none;
 
 }
-nav li {
+nav li  {
 	padding: 0 10px;
 	font-size: 1.2em;
 }
@@ -186,7 +186,7 @@ footer nav ul {
 	margin: 2em
 }
 
-/*filters*/
+/*filters and buttons*/
 .filters {
 	display: flex;
     justify-content: center;
@@ -221,3 +221,76 @@ footer nav ul {
     padding: 8px 15px;
     cursor: pointer;
   }
+
+ 
+
+  /*login*/
+  #login {
+    width: 50%;
+    margin: auto;
+    padding-top: 150px; 
+}
+
+.login-title {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 37px;
+  color: #1D6154;
+  text-align: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+#login form {
+  text-align: left;
+  margin-top: 37px;
+  display: flex;
+  flex-direction: column;
+}
+
+#login input {
+  height: 50px;
+  font-size: 14px;
+  border: none;
+  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+}
+
+#login p {
+  color: red;
+}
+
+input[type="submit"] {
+  margin: 48px auto;
+  border-radius: 60px;
+  background: #1D6154;
+  width: 179px;
+  height: 36px;
+  color: #FFF;
+  text-align: center;
+  font-family: 'Syne', sans-serif;
+}
+
+#login label {
+  margin: 32px 0 16px 0;
+  color: #3D3D3D;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pass-forget {
+  display: block;
+  margin: auto;
+  color: #3d3d3d;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+.logout-link {
+	text-decoration: none;
+	color: black;
+  }
+
