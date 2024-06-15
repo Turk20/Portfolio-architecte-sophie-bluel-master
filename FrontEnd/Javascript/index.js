@@ -1,69 +1,107 @@
-const gallery = document.querySelector(".gallery"); // Sélectionne l'élément avec la classe "gallery"
-const filters = document.querySelector(".filters"); // Sélectionne l'élément avec la classe "filters"
+const gallery = document.querySelector(".gallery");
+const filters = document.querySelector(".filters");
 
+// Fonction pour récupérer des données depuis l'API
 async function getData(endpoint) {
-  const response = await fetch(`http://localhost:5678/api/${endpoint}`); // Effectue une requête HTTP GET vers l'endpoint spécifié
+  const response = await fetch(`http://localhost:5678/api/${endpoint}`);
   if (response.ok) {
-    return await response.json(); // Si la réponse est OK, renvoie les données au format JSON
+    return await response.json();
   } else {
-    console.error(`Error fetching ${endpoint}:`, response.status); // Sinon, affiche une erreur dans la console
+    console.error(`Error fetching ${endpoint}:`, response.status);
     return [];
   }
 }
 
+// Afficher les œuvres dans la galerie
 async function affichageWorks() {
-  const arrayWorks = await getData("works"); // Récupère les données des "works"
-  arrayWorks.forEach(createWorks); // Pour chaque élément dans le tableau, appelle la fonction createWorks
+  const arrayWorks = await getData("works");
+  arrayWorks.forEach(createWorks);
 }
 
+// Créer et insérer les éléments HTML pour chaque œuvre
 function createWorks(work) {
   const workHTML = `
-    <figure>
-        <img src="${work.imageUrl}" alt="${work.title}">
-        <figcaption>${work.title}</figcaption>
-    </figure>
-  `;
-  gallery.insertAdjacentHTML("beforeend", workHTML); // Insère le contenu HTML généré dans l'élément "gallery"
+        <figure data-id="${work.id}">
+            <img src="${work.imageUrl}" alt="${work.title}">
+            <figcaption>${work.title}</figcaption>
+        </figure>
+    `;
+  gallery.insertAdjacentHTML("beforeend", workHTML);
 }
 
+// Afficher les boutons de catégories
 async function displayCategorysButtons() {
-  const categorys = await getData("categories"); // Récupère les données des "categories"
-  const allBtn = createButton("Tous", "0"); // Crée un bouton pour afficher toutes les catégories
-  filters.appendChild(allBtn); // Ajoute le bouton à l'élément "filters"
-  categorys.forEach((category) => {
-    const btn = createButton(category.name, category.id); // Crée un bouton pour chaque catégorie
-    filters.appendChild(btn); // Ajoute le bouton à l'élément "filters"
-  });
+  // Vérifier si l'utilisateur est connecté
+  const loged = JSON.parse(window.sessionStorage.getItem("loged"));
+  if (!loged) {
+    // Afficher les catégories uniquement si l'utilisateur n'est pas connecté
+    const categorys = await getData("categories");
+    const allBtn = createButton("Tous", "0");
+    filters.appendChild(allBtn);
+    categorys.forEach((category) => {
+      const btn = createButton(category.name, category.id);
+      filters.appendChild(btn);
+    });
+  }
 }
 
+// Créer un bouton de catégorie
 function createButton(text, id) {
-  const btn = document.createElement("button"); // Crée un élément de bouton
-  btn.textContent = text; // Définit le texte du bouton
-  btn.id = id; // Définit l'ID du bouton
-  btn.classList.add("btn"); // Ajoute la classe "btn" au bouton
-  return btn; // Renvoie le bouton créé
+  const btn = document.createElement("button");
+  btn.textContent = text;
+  btn.id = id;
+  btn.classList.add("btn");
+  return btn;
 }
 
+// Filtrer les œuvres par catégorie
 async function filterCategory() {
-  const categories = await getData("works"); // Récupère les données des "works"
-  const buttons = document.querySelectorAll(".filters button"); // Sélectionne tous les boutons dans l'élément "filters"
+  const categories = await getData("works");
+  const buttons = document.querySelectorAll(".filters button");
   buttons.forEach((button) => {
     button.addEventListener("click", (e) => {
-      // Ajoute un écouteur d'événements "click" à chaque bouton
-      const btnId = e.target.id; // Récupère l'ID du bouton cliqué
-      gallery.innerHTML = ""; // Vide le contenu de l'élément "gallery"
+      const btnId = e.target.id;
+      gallery.innerHTML = "";
       if (btnId !== "0") {
         const categoriesTriCategory = categories.filter(
           (work) => work.categoryId == btnId
-        ); // Filtre les "works" en fonction de l'ID de la catégorie sélectionnée
-        categoriesTriCategory.forEach(createWorks); // Pour chaque élément dans le tableau filtré, appelle la fonction createWorks
+        );
+        categoriesTriCategory.forEach(createWorks);
       } else {
-        affichageWorks(); // Si le bouton "Tous" est cliqué, affiche tous les "works"
+        affichageWorks();
       }
     });
   });
 }
 
-affichageWorks(); // Appelle la fonction pour afficher les "works"
-displayCategorysButtons(); // Appelle la fonction pour afficher les boutons de catégorie
-filterCategory(); // Appelle la fonction pour filtrer les "works" en fonction de la catégorie sélectionnée
+// Appeler les fonctions pour afficher les œuvres, les catégories et ajouter les filtres
+affichageWorks();
+displayCategorysButtons();
+filterCategory();
+
+// Gérer l'état de connexion de l'utilisateur
+const loged = JSON.parse(window.sessionStorage.getItem("loged"));
+const logout = document.querySelector("header nav li .logout");
+const Banner = document.querySelector(".banner");
+const Modif = document.querySelector(".modify");
+
+if (loged) {
+  // Si l'utilisateur est connecté
+  // Afficher le banner de connexion
+  Banner.style.display = "flex";
+
+  // Mettre à jour le texte du bouton de déconnexion
+  logout.textContent = "Logout";
+
+  // Gérer la déconnexion de l'utilisateur
+  logout.addEventListener("click", () => {
+    window.sessionStorage.setItem("loged", false);
+  });
+
+  // Ajuster les styles si nécessaire (par exemple, le décalage du header)
+  const header = document.querySelector("header");
+  header.style.marginTop = "75px";
+
+  // Afficher l'élément ".modify"
+  Modif.style.display = "flex";
+}

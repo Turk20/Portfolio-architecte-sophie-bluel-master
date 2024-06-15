@@ -36,6 +36,7 @@ form.addEventListener("submit", function (event) {
       if (data.token) {
         localStorage.setItem("token", data.token); // Stocke le token dans le localStorage
         // Authentification réussie : redirige l'utilisateur vers la page d'accueil
+        window.sessionStorage.loged = "true";
         window.location.href = "./index.html";
       } else {
         messageErreur.textContent =
