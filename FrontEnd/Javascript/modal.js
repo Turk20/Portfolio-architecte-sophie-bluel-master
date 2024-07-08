@@ -1,14 +1,21 @@
 const modif = document.querySelector("main .modif");
 const containerModals = document.querySelector(".containerModals");
+const modalGallery = document.querySelector(".modalGallery");
+const modalAddPhoto = document.querySelector(".modalAddPhoto");
 
 modif.addEventListener("click", () => {
   containerModals.style.display = "flex";
+  modalGallery.style.display = "flex";
+  modalAddPhoto.style.display = "none";
 });
 
 const xmark = document.querySelector(".containerModals .fa-xmark");
 
-xmark.addEventListener("click", () => {
+xmark.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
   containerModals.style.display = "none";
+  resetAddPhotoForm();
 });
 
 async function getPhotos() {
@@ -37,13 +44,33 @@ async function displayGalleryModal() {
   deletePhoto();
 }
 
+async function displayMainGallery() {
+  const gallery = document.querySelector(".gallery");
+  gallery.innerHTML = "";
+  const photos = await getPhotos();
+  photos.forEach((photo) => {
+    const figure = document.createElement("figure");
+    figure.dataset.id = photo.id;
+    const img = document.createElement("img");
+    img.src = photo.imageUrl;
+    const figcaption = document.createElement("figcaption");
+    figcaption.textContent = photo.title;
+    figure.appendChild(img);
+    figure.appendChild(figcaption);
+    gallery.appendChild(figure);
+  });
+}
+
 displayGalleryModal();
+displayMainGallery();
 
 function deletePhoto() {
   const trashAll = document.querySelectorAll(".GalleryModal .deleteIcon");
   trashAll.forEach((trash) => {
     trash.addEventListener("click", async (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      console.log("Suppression de la photo...");
 
       const id = trash.id;
       const token = localStorage.getItem("token");
@@ -65,8 +92,10 @@ function deletePhoto() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        console.log("Photo supprimée avec succès :", data);
+        console.log("Photo supprimée avec succès");
+
+        displayGalleryModal();
+        displayMainGallery();
       } catch (error) {
         console.error("Erreur lors de la suppression de la photo :", error);
       }
@@ -90,14 +119,10 @@ function removePhotoFromModal(id) {
   }
 }
 
-// Faire apparaitre la deuxième modale
 const btnAddModal = document.querySelector(".modalGallery button");
-const modalAddPhoto = document.querySelector(".modalAddPhoto");
-const modalGallery = document.querySelector(".modalGallery");
 const arrowleft = document.querySelector(".modalAddPhoto .fa-arrow-left");
 const markAdd = document.querySelector(".modalAddPhoto .fa-xmark");
 
-// Fonction pour afficher les catégories
 async function displayCategories() {
   const categories = await getData("categories");
   const categorySelect = document.getElementById("category");
@@ -112,29 +137,36 @@ async function displayCategories() {
 
 displayCategories();
 
-// Fonction pour afficher la modale d'ajout de photo
 function displayAddModal() {
-  btnAddModal.addEventListener("click", () => {
+  btnAddModal.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     modalAddPhoto.style.display = "flex";
     modalGallery.style.display = "none";
   });
-  arrowleft.addEventListener("click", () => {
+  arrowleft.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     modalAddPhoto.style.display = "none";
     modalGallery.style.display = "flex";
+    resetAddPhotoForm();
   });
-  markAdd.addEventListener("click", () => {
+  markAdd.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     containerModals.style.display = "none";
-    window.location = "index.html";
+    resetAddPhotoForm();
   });
 }
 displayAddModal();
 
-// Faire la prévisualisation de l'image sélectionnée
 const previewImg = document.querySelector(".containerFile img");
 const inputFile = document.querySelector(".containerFile input");
 const labelFile = document.querySelector(".containerFile label");
 const iconFile = document.querySelector(".containerFile .fa-image");
 const pFile = document.querySelector(".containerFile p");
+const titleInput = document.getElementById("title");
+const categoryInput = document.getElementById("category");
 
 inputFile.addEventListener("change", () => {
   const file = inputFile.files[0];
@@ -142,7 +174,8 @@ inputFile.addEventListener("change", () => {
     const reader = new FileReader();
     reader.onload = function (e) {
       previewImg.src = e.target.result;
-      previewImg.style.display = "flex";
+      previewImg.classList.add("visible");
+      previewImg.style.display = "block";
       labelFile.style.display = "none";
       iconFile.style.display = "none";
       pFile.style.display = "none";
@@ -151,9 +184,20 @@ inputFile.addEventListener("change", () => {
   }
 });
 
+function resetAddPhotoForm() {
+  inputFile.value = "";
+  previewImg.src = "";
+  previewImg.style.display = "none";
+  previewImg.classList.remove("visible");
+  labelFile.style.display = "flex";
+  iconFile.style.display = "flex";
+  pFile.style.display = "flex";
+  titleInput.value = "";
+  categoryInput.value = "";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const fileInput = document.getElementById("file");
-  const titleInput = document.getElementById("title");
   const categorySelect = document.getElementById("category");
   const submitButton = document.querySelector("#addPhotoForm .button");
 
@@ -174,16 +218,17 @@ document.addEventListener("DOMContentLoaded", () => {
   categorySelect.addEventListener("change", validateForm);
 });
 
-const titleInput = document.getElementById("title");
-const categoryInput = document.getElementById("category");
+const addPhotoForm = document.getElementById("addPhotoForm");
 
 addPhotoForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  e.stopPropagation();
 
   const formData = new FormData();
   formData.append("title", titleInput.value);
   formData.append("category", categoryInput.value);
   formData.append("image", inputFile.files[0]);
+
   const token = localStorage.getItem("token");
 
   try {
@@ -199,6 +244,14 @@ addPhotoForm.addEventListener("submit", async (e) => {
     }
     const data = await response.json();
     console.log("Photo ajoutée avec succès :", data);
+
+    resetAddPhotoForm();
+
+    displayGalleryModal();
+    displayMainGallery();
+
+    modalAddPhoto.style.display = "none";
+    modalGallery.style.display = "flex";
   } catch (error) {
     console.error("Erreur lors de l'ajout de la photo :", error);
   }
