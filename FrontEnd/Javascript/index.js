@@ -81,7 +81,6 @@ async function filtrerParCategorie(e) {
 afficherOeuvres();
 afficherBoutonsCategories();
 
-// Gérer l'état de connexion de l'utilisateur
 const loged = JSON.parse(window.sessionStorage.getItem("loged"));
 const logout = document.querySelector("header nav li .logout");
 const banner = document.querySelector(".banner");
@@ -89,13 +88,13 @@ const modify = document.querySelector(".modify");
 
 if (loged) {
   banner.style.display = "flex";
+  logout.textContent = "Logout";
 
   if (logout) {
-    logout.textContent = "Logout";
-
     logout.addEventListener("click", () => {
+      localStorage.removeItem("token");
       window.sessionStorage.setItem("loged", false);
-      location.reload();
+      window.location.href = "./login.html";
     });
   }
 
